@@ -1,0 +1,50 @@
+.view-answers-container {
+	padding-top: 32px;
+	padding-bottom: 32px;
+}
+
+.view-answers-title {
+	font-weight: 700;
+	margin-bottom: 32px;
+}
+
+.view-answers-accordion {
+	margin-bottom: 8px;
+	border-radius: 8px !important;
+}
+
+.view-answers-accordion::before {
+	display: none;
+}
+
+.view-answers-user-title {
+	font-weight: 600;
+}
+
+.view-answers-empty-text {
+	color: rgba(0, 0, 0, 0.6);
+}
+
+.view-answers-questionnaire-group {
+	margin-bottom: 24px;
+}
+
+.view-answers-questionnaire-title {
+	font-weight: 700;
+	color: #1976d2;
+	margin-bottom: 8px;
+}
+
+.view-answers-list-item {
+	padding-left: 0;
+	padding-right: 0;
+}
+
+.view-answers-question-text {
+	font-weight: 500;
+}
+
+.view-answers-answer-text {
+	color: rgba(0, 0, 0, 0.87);
+	margin-top: 4px;
+}

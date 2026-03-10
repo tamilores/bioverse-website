@@ -1,0 +1,48 @@
+.vq-count-container {
+	max-width: 980px;
+	margin: 0 auto;
+	padding: 32px 16px;
+}
+
+.vq-count-title {
+	font-weight: 700;
+	margin-bottom: 24px;
+}
+
+.vq-count-head-cell {
+	font-weight: 700;
+}
+
+.vq-count-row {
+	cursor: pointer;
+}
+
+.vq-count-empty-text {
+	color: rgba(0, 0, 0, 0.6);
+}
+
+.vq-count-group {
+	margin-bottom: 24px;
+}
+
+.vq-count-group-title {
+	margin-bottom: 8px;
+	color: #1976d2;
+	font-weight: 700;
+}
+
+.vq-count-item {
+	padding: 8px 0;
+}
+
+.vq-count-question {
+	font-weight: 500;
+}
+
+.vq-count-answer {
+	margin-top: 4px;
+}
+
+.vq-count-divider {
+	margin-top: 8px;
+}

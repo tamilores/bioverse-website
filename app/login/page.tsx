@@ -6,7 +6,7 @@ import { useUser } from '../context/UserContext';
 import "./page.css";
 import { Box, Tab, Tabs, Paper, Button, TextField, Typography, 
     FormControlLabel, Checkbox, Divider } from "@mui/material";
-import { setCookie, getCookie } from 'cookies-next';
+import { setCookie } from 'cookies-next';
 
 
 const HARDCODED_USERS = [
@@ -25,14 +25,16 @@ export default function Login() {
     const [password, setPassword] = useState("");
     
     const handleLogin = () => {
-        const matchedUser = HARDCODED_USERS.find(
-            (u) => u.username === username.trim() && u.password === password
-        );
+        const normalizedUsername = username.trim();
 
-        if(username.trim() === "" || password === "") {
+        if (!normalizedUsername || !password) {
             alert("Please fill in all fields");
             return;
         }
+
+        const matchedUser = HARDCODED_USERS.find(
+            (u) => u.username === normalizedUsername && u.password === password
+        );
 
         if (!matchedUser) {
             alert("Invalid username/password");
@@ -59,7 +61,7 @@ export default function Login() {
             id: matchedUser.id,
             username: matchedUser.username,
             isAdmin: matchedUser.isAdmin,
-        }));
+        }), { sameSite: "lax" });
 
         router.push(matchedUser.isAdmin ? "/admin" : "/user");
     };

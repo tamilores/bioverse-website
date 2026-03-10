@@ -2,11 +2,11 @@ import { prisma } from "@/lib/prisma";
 import QuestionnaireForm from "./QuestionnaireForm";
 
 type PageProps = {
-  searchParams: Promise<{ id?: string }>;
+  searchParams?: { id?: string };
 };
 
 export default async function Questionnaire({ searchParams }: PageProps) {
-    const { id } = await searchParams;
+    const id = searchParams?.id;
     const questionnaireId = Number(id ?? 1);
 
     const junctionData = await prisma.junction.findMany({

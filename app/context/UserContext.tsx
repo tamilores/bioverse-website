@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from "react";
+import { getCookie } from "cookies-next";
 
 interface User {
     id: number;
@@ -15,14 +16,21 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export function UserProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
+function getInitialUser(): User | null {
+    const cookie = getCookie("user");
+    if (!cookie) return null;
 
-    return (
-        <UserContext.Provider value={{ user, setUser }}>
-        {children}
-        </UserContext.Provider>
-    );
+    try {
+        return JSON.parse(String(cookie)) as User;
+    } catch {
+        return null;
+    }
+}
+
+export function UserProvider({ children }: { children: ReactNode }) {
+    const [user, setUser] = useState<User | null>(() => getInitialUser());
+
+    return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
 }
 
 export function useUser() {

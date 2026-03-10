@@ -1,82 +1,3 @@
-// import { NextRequest, NextResponse } from "next/server";
-// import { prisma } from "@/lib/prisma";
-
-// type IncomingResponse = {
-//   answer: string[];
-//   questionId: number;
-//   questionnaireId: number;
-// };
-
-// type CookieUser = {
-//   id: number;
-//   username: string;
-//   isAdmin: boolean;
-// };
-
-// function getUserFromCookie(req: NextRequest): CookieUser | null {
-//   const cookie = req.cookies.get("user")?.value;
-//   if (!cookie) return null;
-
-//   try {
-//     return JSON.parse(cookie) as CookieUser;
-//   } catch {
-//     try {
-//       return JSON.parse(decodeURIComponent(cookie)) as CookieUser;
-//     } catch {
-//       return null;
-//     }
-//   }
-// }
-
-// export async function POST(req: NextRequest) {
-//   try {
-//     const user = getUserFromCookie(req);
-
-//     if (!user?.id || !Number.isInteger(user.id)) {
-//       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-//     }
-
-//     const body = await req.json();
-//     const responses: IncomingResponse[] = Array.isArray(body?.responses) ? body.responses : [];
-
-//     if (responses.length === 0) {
-//         console.log("No responses provided in request body");
-//       return NextResponse.json({ error: "No responses provided" }, { status: 400 });
-//     }
-
-//     const validResponses = responses.filter(
-//       (item) =>
-//         Number.isInteger(item.questionId) &&
-//         Number.isInteger(item.questionnaireId) &&
-//         Array.isArray(item.answer),
-//     );
-
-//     if (validResponses.length === 0) {
-//       return NextResponse.json({ error: "No valid responses provided" }, { status: 400 });
-//     }
-
-//     console.log("Data being sent to Prisma:", validResponses.map(item => ({
-//   userId: user.id,
-//   questionId: item.questionId,
-//   questionnaireId: item.questionnaireId,
-//   answer: item.answer 
-// })));
-
-//     await prisma.responses.createMany({
-//       data: validResponses.map((item) => ({
-//         userId: user.id,
-//         questionId: item.questionId,
-//         questionnaireId: item.questionnaireId,
-//         answer: item.answer,
-//       })),
-//     });
-
-//     return NextResponse.json({ ok: true, count: validResponses.length });
-//   } catch (error) {
-//     return NextResponse.json({ error: "Failed to save responses" }, { status: 500 });
-//   }
-// }
-
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -88,8 +9,6 @@ type IncomingResponse = {
 
 type CookieUser = {
   id: number;
-  username: string;
-  isAdmin: boolean;
 };
 
 function getUserFromCookie(req: NextRequest): CookieUser | null {
@@ -107,6 +26,53 @@ function getUserFromCookie(req: NextRequest): CookieUser | null {
   }
 }
 
+export async function GET(req: NextRequest) {
+  try {
+    const user = getUserFromCookie(req);
+
+    if (!user?.id || !Number.isInteger(user.id)) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    const questionnaireIdRaw = req.nextUrl.searchParams.get("questionnaireId");
+    const questionnaireId = Number(questionnaireIdRaw);
+
+    if (!questionnaireIdRaw || !Number.isInteger(questionnaireId)) {
+      return NextResponse.json({ error: "Invalid questionnaireId" }, { status: 400 });
+    }
+
+    const rows = await prisma.responses.findMany({
+      where: {
+        userId: user.id,
+        questionnaireId,
+      },
+      select: {
+        id: true,
+        questionId: true,
+        answer: true,
+      },
+      orderBy: { id: "desc" },
+    });
+
+    const latestByQuestion = new Map<number, string[]>();
+    rows.forEach((row) => {
+      if (!latestByQuestion.has(row.questionId)) {
+        latestByQuestion.set(row.questionId, row.answer ?? []);
+      }
+    });
+
+    return NextResponse.json({
+      responses: Array.from(latestByQuestion.entries()).map(([questionId, answer]) => ({
+        questionId,
+        answer,
+      })),
+    });
+  } catch (error) {
+    console.error("Fetch responses error:", error);
+    return NextResponse.json({ error: "Failed to fetch responses" }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const user = getUserFromCookie(req);
@@ -119,7 +85,6 @@ export async function POST(req: NextRequest) {
     const responses: IncomingResponse[] = Array.isArray(body?.responses) ? body.responses : [];
 
     if (responses.length === 0) {
-      console.log("No responses provided in request body");
       return NextResponse.json({ error: "No responses provided" }, { status: 400 });
     }
 
@@ -134,14 +99,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No valid responses provided" }, { status: 400 });
     }
 
-    console.log("Data being sent to Prisma:", validResponses.map(item => ({
-      userId: user.id,
-      questionId: item.questionId,
-      questionnaireId: item.questionnaireId,
-      answer: item.answer 
-    })));
-
-    // Execute both the insert and the update as a single transaction
     await prisma.$transaction([
       prisma.responses.createMany({
         data: validResponses.map((item) => ({
@@ -156,7 +113,7 @@ export async function POST(req: NextRequest) {
         where: { id: user.id },
         data: {
           questionCount: {
-            increment: 1, // Atomically increases the field by 1
+            increment: 1,
           },
         },
       }),

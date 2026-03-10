@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import "./page.css";
 
@@ -62,6 +62,39 @@ export default function QuestionnaireForm({
     });
   };
 
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadExistingAnswers() {
+      try {
+        const response = await fetch(`/api/responses?questionnaireId=${questionnaireId}`, {
+          method: "GET",
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const existing = Array.isArray(data?.responses) ? data.responses : [];
+        const mapped: Record<number, string[]> = {};
+
+        existing.forEach((item: { questionId: number; answer: string[] }) => {
+          if (!Number.isInteger(item?.questionId) || !Array.isArray(item?.answer)) return;
+          mapped[item.questionId] = item.answer;
+        });
+
+        if (!isMounted) return;
+
+        setAnswers((prev) => (Object.keys(prev).length > 0 ? prev : mapped));
+      } catch {      }
+    }
+
+    loadExistingAnswers();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [questionnaireId]);
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -70,7 +103,7 @@ export default function QuestionnaireForm({
     const responses = questions.map((q) => ({
       questionId: q.id,
       questionnaireId,
-      answer: answers[q.id].map(a => a.trim()).filter(Boolean),
+      answer: (answers[q.id] ?? []).map((a) => a.trim()).filter(Boolean),
     }));
 
     await fetch("/api/responses", {

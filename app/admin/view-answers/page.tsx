@@ -1,106 +1,99 @@
 import { prisma } from "@/lib/prisma";
-
-type QA = { question: string; answer: string[] };
-type QuestionnaireGroup = { questionnaireName: string; items: QA[] };
-type Row = {
-	userId: number;
-	username: string;
-	questionnaireName: string | null;
-	questionText: string | null;
-	answer: string[] | null;
-};
+import { 
+  Container, 
+  Typography, 
+  Accordion, 
+  AccordionSummary, 
+  AccordionDetails, 
+  Box, 
+  List, 
+  ListItem, 
+  ListItemText, 
+  Divider 
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import "./page.css";
 
 export default async function ViewAnswersPage() {
-	const users = await prisma.user.findMany({
-  orderBy: { id: "asc" },
-  select: {
-    id: true,
-    username: true,
-    responses: {
-      select: {
-        questionnaireId: true,
-        answer: true,
-        questionnaire: {
-          select: { name: true },
-        },
-        question: {
-          select: {
+    const users = await prisma.user.findMany({
+        where: { isAdmin: false },
+        orderBy: { id: "asc" },
+        select: {
             id: true,
-            question: true,
-            type: true,
-            options: true,
-          },
+            username: true,
+            responses: {
+                select: {
+                    answer: true,
+                    questionnaire: { select: { name: true } },
+                    question: { select: { question: true } },
+                },
+            },
         },
-      },
-    },
-  },
-});
+    });
 
-	const userMap = new Map<number, { id: number; username: string; questionnaires: QuestionnaireGroup[] }>();
-	const questionnaireMap = new Map<string, QA[]>();
+    const groupedData = users.map((user) => {
+        const questionnaireMap = new Map<string, { question: string; answer: string[] }[]>();
+        user.responses.forEach((resp) => {
+            const qName = resp.questionnaire.name;
+            if (!questionnaireMap.has(qName)) questionnaireMap.set(qName, []);
+            questionnaireMap.get(qName)!.push({
+                question: resp.question.question,
+                answer: resp.answer,
+            });
+        });
 
-	rows.forEach((row) => {
-		if (!userMap.has(row.userId)) {
-			userMap.set(row.userId, {
-				id: row.userId,
-				username: row.username,
-				questionnaires: [],
-			});
-		}
+        return {
+            id: user.id,
+            username: user.username,
+            questionnaires: Array.from(questionnaireMap.entries()).map(([name, items]) => ({
+                questionnaireName: name,
+                items,
+            })),
+        };
+    });
 
-		if (!row.questionnaireName || !row.questionText) return;
+    return (
+        <Container maxWidth="md" className="view-answers-container">
+            <Typography variant="h4" gutterBottom component="h1" className="view-answers-title">
+                User Submissions
+            </Typography>
 
-		const key = `${row.userId}::${row.questionnaireName}`;
-		if (!questionnaireMap.has(key)) questionnaireMap.set(key, []);
-		questionnaireMap.get(key)!.push({
-			question: row.questionText,
-			answer: row.answer ?? [],
-		});
-	});
-
-	userMap.forEach((user) => {
-		const questionnaires: QuestionnaireGroup[] = [];
-		questionnaireMap.forEach((items, key) => {
-			const [userId, questionnaireName] = key.split("::");
-			if (Number(userId) === user.id) {
-				questionnaires.push({ questionnaireName, items });
-			}
-		});
-		user.questionnaires = questionnaires;
-	});
-
-	const grouped = Array.from(userMap.values());
-
-	return (
-		<main style={{ maxWidth: 900, margin: "0 auto", padding: "20px 16px" }}>
-			<h1 style={{ marginBottom: 16 }}>View Answers</h1>
-
-			{grouped.map((user) => (
-				<details key={user.id} style={{ marginBottom: 12, border: "1px solid #ddd", borderRadius: 8, padding: 10 }}>
-					<summary style={{ cursor: "pointer", fontWeight: 600 }}>
-						{user.username}
-					</summary>
-
-					{user.questionnaires.length === 0 ? (
-						<p style={{ marginTop: 10 }}>No answered questionnaires.</p>
-					) : (
-						<div style={{ marginTop: 10, paddingLeft: 10 }}>
-							{user.questionnaires.map((q) => (
-								<details key={q.questionnaireName} style={{ marginBottom: 8 }}>
-									<summary style={{ cursor: "pointer" }}>{q.questionnaireName}</summary>
-									<ul style={{ marginTop: 8 }}>
-										{q.items.map((item, idx) => (
-											<li key={`${q.questionnaireName}-${idx}`}>
-												<strong>{item.question}:</strong> {item.answer.join(", ")}
-											</li>
-										))}
-									</ul>
-								</details>
-							))}
-						</div>
-					)}
-				</details>
-			))}
-		</main>
-	);
+            {groupedData.map((user) => (
+                <Accordion key={user.id} className="view-answers-accordion">
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography variant="h6" className="view-answers-user-title">
+                            {user.username} (ID: {user.id})
+                        </Typography>
+                    </AccordionSummary>
+                    
+                    <AccordionDetails>
+                        {user.questionnaires.length === 0 ? (
+                            <Typography className="view-answers-empty-text">No questionnaires answered yet.</Typography>
+                        ) : (
+                            user.questionnaires.map((q) => (
+                                <Box key={q.questionnaireName} className="view-answers-questionnaire-group">
+                                    <Typography variant="subtitle1" className="view-answers-questionnaire-title">
+                                        {q.questionnaireName.toUpperCase()}
+                                    </Typography>
+                                    
+                                    <List disablePadding>
+                                        {q.items.map((item, idx) => (
+                                            <Box key={idx}>
+                                                <ListItem alignItems="flex-start" className="view-answers-list-item">
+                                                    <ListItemText
+                                                        primary={`Q. ${item.question}`}
+                                                        secondary={`A. ${item.answer.join(", ")}`} />
+                                                </ListItem>
+                                                {idx < q.items.length - 1 && <Divider component="li" />}
+                                            </Box>
+                                        ))}
+                                    </List>
+                                </Box>
+                            ))
+                        )}
+                    </AccordionDetails>
+                </Accordion>
+            ))}
+        </Container>
+    );
 }
