@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
     });
 
     const latestByQuestion = new Map<number, string[]>();
-    rows.forEach((row) => {
+    rows.forEach((row: ResponseRow) => {
       if (!latestByQuestion.has(row.questionId)) {
         latestByQuestion.set(row.questionId, row.answer ?? []);
       }
