@@ -14,6 +14,8 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import "./page.css";
 
+export const dynamic = "force-dynamic";
+
 export default async function ViewAnswersPage() {
     const users = await prisma.user.findMany({
         where: { isAdmin: false },

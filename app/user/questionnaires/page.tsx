@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import QuestionnaireForm from "./QuestionnaireForm";
 
+export const dynamic = "force-dynamic";   //build issues
+
 type PageProps = {
   searchParams?: { id?: string };
 };

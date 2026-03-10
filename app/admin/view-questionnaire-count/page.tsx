@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import QuestionnaireCountTable from "./QuestionnaireCountTable";
 
+export const dynamic = "force-dynamic";
+
 export type UserQuestionnaireSummary = {
 	id: number;
 	username: string;
