@@ -6,7 +6,7 @@ import { useUser } from "../context/UserContext";
 import { useRouter } from 'next/navigation';
 import { setCookie } from 'cookies-next';
 
-export default function UserLayout({ children, }: { children: React.ReactNode }) {
+export default function AdminLayout({ children, }: { children: React.ReactNode }) {
     const { user, setUser } = useUser();
     const router = useRouter();
     const handleLogout = () => {

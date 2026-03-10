@@ -1,0 +1,22 @@
+.questionnaire-form {
+  width: 100%;
+}
+
+.questionnaire-stack {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.questionnaire-title {
+  margin-bottom: 4px;
+}
+
+.questionnaire-card {
+  border-radius: 10px;
+}
+
+.questionnaire-submit {
+  align-self: flex-start;
+  min-width: 120px;
+}

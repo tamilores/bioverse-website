@@ -1,17 +1,69 @@
-'use client';
+"use client"
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useUser } from '../context/UserContext';
 import "./page.css";
 import { Box, Tab, Tabs, Paper, Button, TextField, Typography, 
     FormControlLabel, Checkbox, Divider } from "@mui/material";
+import { setCookie, getCookie } from 'cookies-next';
 
 
-function Login(){
+const HARDCODED_USERS = [
+    {id: 1, username: "tami", password: "usertami", isAdmin: false},
+    {id: 2, username: "semi", password: "usersemi", isAdmin: false},
+    {id: 3, username: "carla", password: "admincarla", isAdmin: true},
+    {id: 4, username: "femi", password: "adminfemi", isAdmin: true}
+]
+
+
+export default function Login() {
     const router = useRouter();
+    const { setUser } = useUser();
     const [role, setRole] = useState("user");
-    const page = (role === "admin" ? "/admin" : "/user");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    
+    const handleLogin = () => {
+        const matchedUser = HARDCODED_USERS.find(
+            (u) => u.username === username.trim() && u.password === password
+        );
 
+        if(username.trim() === "" || password === "") {
+            alert("Please fill in all fields");
+            return;
+        }
+
+        if (!matchedUser) {
+            alert("Invalid username/password");
+            return;
+        }
+
+        if (role === "admin" && !matchedUser.isAdmin) {
+        alert("This is not an admin account.");
+            return;
+        }
+
+        if (role === "user" && matchedUser.isAdmin) {
+        alert("This is not a user account.");
+            return;
+        }
+
+        setUser({
+            id: matchedUser.id,
+            username: matchedUser.username,
+            isAdmin: matchedUser.isAdmin,
+        });
+
+        setCookie("user", JSON.stringify({
+            id: matchedUser.id,
+            username: matchedUser.username,
+            isAdmin: matchedUser.isAdmin,
+        }));
+
+        router.push(matchedUser.isAdmin ? "/admin" : "/user");
+    };
+    
     return(
         <>
         <Box className= "login-container">
@@ -32,8 +84,8 @@ function Login(){
 
             <Paper className={`${role === "admin" ? "admin-form" : "user-form"}-container`}>
                 <Typography variant="h3">log in</Typography>
-                <TextField label="Email" type="email"/>
-                <TextField label="Password" type="password" />
+                <TextField required label="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
+                <TextField required label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                 <div>
                     <FormControlLabel control={<Checkbox />} label={<Typography variant="body2">Remember me</Typography>}/>
                     <Typography variant="body2">Forgot password?</Typography>
@@ -41,8 +93,7 @@ function Login(){
                 <Button
                 variant="contained"
                 className="login-button"
-                onClick={() => router.push(page)} 
-                >
+                onClick={handleLogin} >
                     Login
                 </Button>
                 <Divider>
@@ -52,7 +103,7 @@ function Login(){
             </Paper>
         </Box>
         </>
-    )   
-}
+    )
+    
+} 
 
-export default Login;

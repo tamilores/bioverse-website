@@ -17,6 +17,7 @@ model Questionnaires {
     name    String
     
     junctions Junction[]
+    responses Responses[]
 }
 
 model Questions {
@@ -51,8 +52,10 @@ model Responses {
   id            Int         @id @default(autoincrement())
   userId        Int    
   questionId    Int
+  questionnaireId Int
   answer        String[]
 
   user          User        @relation(fields: [userId], references: [id])
   question      Questions   @relation(fields: [questionId], references: [id])
+  questionnaire Questionnaires  @relation(fields: [questionnaireId], references: [id])
 }

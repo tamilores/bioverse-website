@@ -1,0 +1,38 @@
+.user-page, .admin-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.user-title, .admin-title {
+  margin-bottom: 16px;
+}
+
+.user-grid, .admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.user-card, .admin-card {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.user-image, .admin-image {
+  height: 140px;
+  object-fit: cover;
+}
+
+.user-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+
+.user-done-text {
+  padding: 0 12px 12px;
+  color: #666;
+  font-size: 12px;
+}
