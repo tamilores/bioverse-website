@@ -7,6 +7,12 @@ type IncomingResponse = {
   questionnaireId: number;
 };
 
+type ResponseRow = {
+  id: number;
+  questionId: number;
+  answer: string[];
+};
+
 type CookieUser = {
   id: number;
 };
@@ -41,7 +47,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Invalid questionnaireId" }, { status: 400 });
     }
 
-    const rows = await prisma.responses.findMany({
+    const rows: ResponseRow[] = await prisma.responses.findMany({
       where: {
         userId: user.id,
         questionnaireId,
