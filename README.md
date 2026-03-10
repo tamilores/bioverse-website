@@ -1,3 +1,14 @@
+const latestByQuestion = new Map<number, string[]>();
+    /* rows.forEach((row) => { */
+    rows.forEach((row: ResponseRow) => {
+      if (!latestByQuestion.has(row.questionId)) {
+        latestByQuestion.set(row.questionId, row.answer ?? []);
+      }
+
+Produced a successful build in VSCode, but not on Vercel
+
+********************************************************************************************************************
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
