@@ -1,0 +1,61 @@
+/* LOGIN PAGE */
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.tabs .MuiTab-root {
+  text-transform: none;
+  font-weight: 600;
+  min-width: 0;
+  position: relative;
+  color: #4a525b;
+  background: #d7dce2;
+  border: 1px solid #aeb6bf;
+  border-bottom: none;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  padding: 8px 12px;
+}
+
+.tabs .MuiTab-root:hover {
+  background: #e8edf3;
+}
+
+.tabs .Mui-selected {
+  background: #ffffff;
+  color: #1f2933;
+}
+
+.tabs,
+.user-form-container,
+.admin-form-container {
+    width: 25vw;
+}
+
+.tabs .MuiTabs-flexContainer {
+  display: flex;
+  justify-content: center; 
+  gap: 55%;
+}
+
+.user-form-container,
+.admin-form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid #aeb6bf;
+}
+
+.user-form-container {
+  border-top-right-radius: 30px !important;
+}
+
+.admin-form-container {
+  border-top-left-radius: 30px !important;
+}
