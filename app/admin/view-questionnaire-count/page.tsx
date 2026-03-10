@@ -3,6 +3,19 @@ import QuestionnaireCountTable from "./QuestionnaireCountTable";
 
 export const dynamic = "force-dynamic";
 
+type ResponseRow = {
+	answer: string[];
+	questionnaire: { name: string };
+	question: { question: string };
+};
+
+type UserRow = {
+	id: number;
+	username: string;
+	questionCount: number;
+	responses: ResponseRow[];
+};
+
 export type UserQuestionnaireSummary = {
 	id: number;
 	username: string;
@@ -14,7 +27,7 @@ export type UserQuestionnaireSummary = {
 };
 
 export default async function ViewQuestionnaireCountPage() {
-	const users = await prisma.user.findMany({
+	const users: UserRow[] = await prisma.user.findMany({
 		where: { isAdmin: false },
 		orderBy: { id: "asc" },
 		select: {

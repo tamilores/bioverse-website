@@ -16,8 +16,20 @@ import "./page.css";
 
 export const dynamic = "force-dynamic";
 
+type ResponseRow = {
+    answer: string[];
+    questionnaire: { name: string };
+    question: { question: string };
+};
+
+type UserRow = {
+    id: number;
+    username: string;
+    responses: ResponseRow[];
+};
+
 export default async function ViewAnswersPage() {
-    const users = await prisma.user.findMany({
+    const users: UserRow[] = await prisma.user.findMany({
         where: { isAdmin: false },
         orderBy: { id: "asc" },
         select: {
