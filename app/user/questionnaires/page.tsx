@@ -33,7 +33,7 @@ export default async function Questionnaire({ searchParams }: PageProps) {
     });
 
     const questionnaireName = (junctionData[0]?.questionnaire.name ?? "QUESTIONNAIRE").toUpperCase();
-    const questions = junctionData.map((row) => ({
+    const questions = junctionData.map((row: (typeof junctionData)[number]) => ({
       id: row.question.id,
       question: row.question.question,
       type: row.question.type,
